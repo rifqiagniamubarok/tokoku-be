@@ -64,7 +64,7 @@ class BasketController extends Controller
     public function get(Request $request): JsonResponse
     {
         $user = Auth::user();
-        $basket = Basket::with('basketItems')->where('status', 'pending')->where('user_id', $user->id)->first();
+        $basket = Basket::with('basketItems.product')->where('status', 'pending')->where('user_id', $user->id)->first();
         if (!$basket) {
             $basket = new Basket();
             $basket->total_price = 0;

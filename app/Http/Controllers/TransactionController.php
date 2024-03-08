@@ -13,7 +13,7 @@ class TransactionController extends Controller
     public function checkout(Request $request): JsonResponse
     {
         $user = Auth::user();
-        $basket = Basket::with('basketItems')->where('status', 'pending')->where('items', '>', 0)->where('user_id', $user->id)->first();
+        $basket = Basket::with('basketItems.product')->where('status', 'pending')->where('items', '>', 0)->where('user_id', $user->id)->first();
 
         if (!$basket) {
             return response()->json([
@@ -21,6 +21,23 @@ class TransactionController extends Controller
             ]);
         }
         $basket->status = 'submit';
+
+        foreach ($basket->basketItems as $basketItem) {
+
+            $product = $basketItem->product;
+
+            $product->stock -= $basketItem->qty;
+
+            if ($product->stock < 0) {
+                $product->stock = 0;
+                $product->is_disable = true;
+            }
+
+            if ($product->stock == 0) {
+                $product->is_disable = true;
+            }
+            $product->save();
+        }
 
         $transaction = new Transaction();
         $transaction->user_id = $user->id;
@@ -33,7 +50,7 @@ class TransactionController extends Controller
 
         return response()->json([
             'data' => $getTransaction,
-        ]);
+        ])->setStatusCode(200);
 
     }
     public function get(Request $request): JsonResponse
@@ -48,7 +65,7 @@ class TransactionController extends Controller
     public function getDetail(Request $request, $id): JsonResponse
     {
         $user = Auth::user();
-        $transaction = Transaction::with('basket')->where('user_id', $user->id)->find($id);
+        $transaction = Transaction::with('basket.basketItems.product')->where('user_id', $user->id)->find($id);
         if (!$transaction) {
             return response()->json([
                 'data' => 'transaction not found',
@@ -62,7 +79,7 @@ class TransactionController extends Controller
     public function pay(Request $request, $id): JsonResponse
     {
         $user = Auth::user();
-        $transaction = Transaction::with('basket')->where('user_id', $user->id)->where('status', 'payment_pending')->find($id);
+        $transaction = Transaction::with('basket.basketItems.product')->where('user_id', $user->id)->where('status', 'payment_pending')->find($id);
         if (!$transaction) {
             return response()->json([
                 'data' => 'transaction not found or transaction has been paid',

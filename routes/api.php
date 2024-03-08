@@ -24,6 +24,9 @@ Route::middleware(\App\Http\Middleware\ApiAuthAdminMiddleware::class)->group(fun
     Route::post('/admin/products', [\App\Http\Controllers\ProductController::class, 'create']);
     Route::get('/admin/products', [\App\Http\Controllers\ProductController::class, 'adminGet']);
     Route::get('/admin/products/{id}', [\App\Http\Controllers\ProductController::class, 'adminGetDetail']);
+    Route::post('/admin/products/stock/{id}', [\App\Http\Controllers\ProductController::class, 'addStock']);
+    Route::post('/admin/products/stock/reduce/{id}', [\App\Http\Controllers\ProductController::class, 'reduceStock']);
+    Route::post('/admin/products/toggle-disable/{id}', [\App\Http\Controllers\ProductController::class, 'togleProductDisable']);
 
     Route::get('/admin/transactions', [\App\Http\Controllers\TransactionController::class, 'adminGet']);
     Route::post('/admin/transactions/confirm/{id}', [\App\Http\Controllers\TransactionController::class, 'adminConfirm']);
@@ -35,6 +38,7 @@ Route::middleware(\App\Http\Middleware\ApiAuthMiddleware::class)->group(function
     Route::delete('/users/logout', [\App\Http\Controllers\UserController::class, 'logout']);
 
     Route::get('/products', [\App\Http\Controllers\ProductController::class, 'get']);
+    Route::get('/products/{id}', [\App\Http\Controllers\ProductController::class, 'getDetail']);
 
     Route::post('/baskets/input/{id}', [\App\Http\Controllers\BasketController::class, 'inputBasket']);
     Route::get('/baskets', [\App\Http\Controllers\BasketController::class, 'get']);

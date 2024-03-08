@@ -70,4 +70,79 @@ class ProductController extends Controller
             "data" => $filteredProducts,
         ])->setStatusCode(200);
     }
+    public function getDetail(Request $request, $id): JsonResponse
+    {
+        $product = Product::where('is_disable', '==', false)
+            ->where('stock', '>', 0)->find($id);
+
+        if (!$product) {
+            return response()->json([
+                "error" => 'product not found',
+            ])->setStatusCode(400);
+        }
+
+        return response()->json([
+            "data" => $product,
+        ])->setStatusCode(200);
+    }
+
+    public function addStock(Request $request, $id): JsonResponse
+    {
+        $new_stock = $request->new_stock;
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                "error" => 'product not found',
+            ])->setStatusCode(400);
+        }
+
+        $product->stock += $new_stock;
+        $product->save();
+
+        return response()->json([
+            "data" => $product,
+        ])->setStatusCode(200);
+    }
+    public function reduceStock(Request $request, $id): JsonResponse
+    {
+        $new_stock = $request->new_stock;
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                "error" => 'product not found',
+            ])->setStatusCode(400);
+        }
+
+        $product->stock = $product->stock - $new_stock;
+        if ($product->stock < 0) {
+            $product->stock = 0;
+        }
+        if ($product->stock == 0) {
+            $product->is_disable = true;
+        }
+        $product->save();
+
+        return response()->json([
+            "data" => $product,
+        ])->setStatusCode(200);
+    }
+    public function togleProductDisable(Request $request, $id): JsonResponse
+    {
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                "error" => 'product not found',
+            ])->setStatusCode(400);
+        }
+
+        $product->is_disable = !$product->is_disable;
+        $product->save();
+
+        return response()->json([
+            "data" => $product,
+        ])->setStatusCode(200);
+    }
 }

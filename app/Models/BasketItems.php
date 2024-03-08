@@ -17,4 +17,8 @@ class BasketItems extends Model
     {
         return $this->belongsTo(Basket::class, 'basket_id', 'id');
     }
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
 }
